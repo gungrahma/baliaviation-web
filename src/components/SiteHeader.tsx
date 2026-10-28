@@ -1,8 +1,7 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { contactEmail } from "../data/community";
 import { ArrowUpRight } from "./ArrowUpRight";
-
-type PageName = "home" | "about" | "gallery" | "contact";
 
 const navigation = [
   { name: "about", label: "Our community", href: "/about/" },
@@ -10,8 +9,9 @@ const navigation = [
   { name: "contact", label: "Say hello", href: "/contact/" },
 ] as const;
 
-export function SiteHeader({ activePage }: { activePage?: PageName }) {
+export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
 
   return (
     <header className="site-header">
@@ -35,7 +35,7 @@ export function SiteHeader({ activePage }: { activePage?: PageName }) {
           <a
             href={item.href}
             key={item.name}
-            aria-current={activePage === item.name ? "page" : undefined}
+            aria-current={pathname.replace(/\/+$/, "") === `/${item.name}` ? "page" : undefined}
           >
             {item.label}
           </a>
