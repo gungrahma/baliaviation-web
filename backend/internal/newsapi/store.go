@@ -18,7 +18,6 @@ type Story struct {
 	Title     string    `json:"title"`
 	Summary   string    `json:"summary"`
 	Category  string    `json:"category"`
-	Status    string    `json:"status"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
@@ -26,11 +25,6 @@ type StoryInput struct {
 	Title    string `json:"title"`
 	Summary  string `json:"summary"`
 	Category string `json:"category"`
-	Status   string `json:"status"`
-}
-
-type StatusInput struct {
-	Status string `json:"status"`
 }
 
 type ValidationError struct {
@@ -62,13 +56,25 @@ func NewStore(path string) (*Store, error) {
 	if store.stories == nil {
 		store.stories = []Story{}
 	}
+	for index := range store.stories {
+		store.stories[index].Category = migrateCategory(store.stories[index].Category)
+	}
+	if err := store.persist(); err != nil {
+		return nil, fmt.Errorf("migrate news store: %w", err)
+	}
 	return store, nil
 }
 
-func (s *Store) List() []Story {
+func (s *Store) List(category string) []Story {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return append([]Story{}, s.stories...)
+	stories := make([]Story, 0, len(s.stories))
+	for _, story := range s.stories {
+		if category == "" || story.Category == category {
+			stories = append(stories, story)
+		}
+	}
+	return stories
 }
 
 func (s *Store) Create(input StoryInput) (Story, error) {
@@ -83,10 +89,6 @@ func (s *Store) Create(input StoryInput) (Story, error) {
 	if !validCategory(input.Category) {
 		return Story{}, &ValidationError{message: "Choose a valid news category."}
 	}
-	if input.Status != "tba" && input.Status != "announced" {
-		return Story{}, &ValidationError{message: "Status must be tba or announced."}
-	}
-
 	id, err := newID()
 	if err != nil {
 		return Story{}, err
@@ -96,7 +98,6 @@ func (s *Store) Create(input StoryInput) (Story, error) {
 		Title:     input.Title,
 		Summary:   input.Summary,
 		Category:  input.Category,
-		Status:    input.Status,
 		CreatedAt: time.Now().UTC(),
 	}
 	s.mu.Lock()
@@ -107,27 +108,6 @@ func (s *Store) Create(input StoryInput) (Story, error) {
 		return Story{}, err
 	}
 	return story, nil
-}
-
-func (s *Store) SetStatus(id, status string) (Story, error) {
-	if status != "tba" && status != "announced" {
-		return Story{}, &ValidationError{message: "Status must be tba or announced."}
-	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	for index := range s.stories {
-		if s.stories[index].ID != id {
-			continue
-		}
-		previous := s.stories[index].Status
-		s.stories[index].Status = status
-		if err := s.persist(); err != nil {
-			s.stories[index].Status = previous
-			return Story{}, err
-		}
-		return s.stories[index], nil
-	}
-	return Story{}, ErrNotFound
 }
 
 func (s *Store) persist() error {
@@ -168,9 +148,24 @@ func (s *Store) persist() error {
 
 func validCategory(category string) bool {
 	switch category {
-	case "Community", "Events", "Spotting", "Learning", "Industry":
+	case "Aircraft", "Plane spotting", "Airline routes", "Community":
 		return true
 	default:
 		return false
+	}
+}
+
+func migrateCategory(category string) string {
+	switch category {
+	case "Spotting":
+		return "Plane spotting"
+	case "Industry":
+		return "Aircraft"
+	case "Events":
+		return "Airline routes"
+	case "Learning":
+		return "Community"
+	default:
+		return category
 	}
 }

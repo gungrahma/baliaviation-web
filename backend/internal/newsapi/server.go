@@ -1,6 +1,7 @@
 package newsapi
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"io"
@@ -9,22 +10,31 @@ import (
 )
 
 type Server struct {
-	store *Store
+	store      *Store
+	adminToken string
 }
 
-func NewHandler(store *Store) http.Handler {
-	server := &Server{store: store}
+func NewHandler(store *Store, adminToken string) http.Handler {
+	server := &Server{store: store, adminToken: adminToken}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/news", server.handleCollection)
-	mux.HandleFunc("/api/news/", server.handleStory)
+	mux.HandleFunc("/api/admin/session", server.handleAdminSession)
 	return mux
 }
 
 func (s *Server) handleCollection(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		writeJSON(w, http.StatusOK, s.store.List())
+		category := r.URL.Query().Get("category")
+		if category != "" && !validCategory(category) {
+			writeError(w, http.StatusBadRequest, "Choose a valid news category.")
+			return
+		}
+		writeJSON(w, http.StatusOK, s.store.List(category))
 	case http.MethodPost:
+		if !s.authorized(w, r) {
+			return
+		}
 		var input StoryInput
 		if err := decodeJSON(w, r, &input); err != nil {
 			writeError(w, http.StatusBadRequest, "Request body must be valid JSON.")
@@ -47,38 +57,30 @@ func (s *Server) handleCollection(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) handleStory(w http.ResponseWriter, r *http.Request) {
-	id := strings.TrimPrefix(r.URL.Path, "/api/news/")
-	if id == "" || strings.Contains(id, "/") {
-		writeError(w, http.StatusNotFound, "Update not found.")
-		return
-	}
-	if r.Method != http.MethodPatch {
-		w.Header().Set("Allow", "PATCH")
+func (s *Server) handleAdminSession(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", "GET")
 		writeError(w, http.StatusMethodNotAllowed, "Method not allowed.")
 		return
 	}
+	w.Header().Set("Cache-Control", "no-store")
+	if !s.authorized(w, r) {
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"authenticated": true})
+}
 
-	var input StatusInput
-	if err := decodeJSON(w, r, &input); err != nil {
-		writeError(w, http.StatusBadRequest, "Request body must be valid JSON.")
-		return
+func (s *Server) authorized(w http.ResponseWriter, r *http.Request) bool {
+	if s.adminToken == "" {
+		writeError(w, http.StatusServiceUnavailable, "News publishing is not configured.")
+		return false
 	}
-	story, err := s.store.SetStatus(id, input.Status)
-	if errors.Is(err, ErrNotFound) {
-		writeError(w, http.StatusNotFound, "Update not found.")
-		return
+	provided := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+	if provided == r.Header.Get("Authorization") || subtle.ConstantTimeCompare([]byte(provided), []byte(s.adminToken)) != 1 {
+		writeError(w, http.StatusUnauthorized, "Admin access is required to publish news.")
+		return false
 	}
-	if err != nil {
-		var validationError *ValidationError
-		if errors.As(err, &validationError) {
-			writeError(w, http.StatusBadRequest, validationError.Error())
-			return
-		}
-		writeError(w, http.StatusInternalServerError, "Could not save this update.")
-		return
-	}
-	writeJSON(w, http.StatusOK, story)
+	return true
 }
 
 func decodeJSON(w http.ResponseWriter, r *http.Request, destination any) error {

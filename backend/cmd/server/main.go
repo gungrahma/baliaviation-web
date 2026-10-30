@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"baliaviation/internal/newsapi"
+	"baliaviation/backend/internal/newsapi"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 	}
 	server := &http.Server{
 		Addr:              address,
-		Handler:           newsapi.NewHandler(store),
+		Handler:           newsapi.NewHandler(store, os.Getenv("NEWS_ADMIN_TOKEN")),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	log.Printf("Bali Aviation news API listening on %s", address)
