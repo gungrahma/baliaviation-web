@@ -3,13 +3,21 @@ import { useLocation } from "react-router-dom";
 import { contactEmail } from "../data/community";
 import { ArrowUpRight } from "./ArrowUpRight";
 
+type Theme = "light" | "dark";
+
 const navigation = [
   { name: "about", label: "Our community", href: "/about/" },
   { name: "gallery", label: "In the skies", href: "/gallery/" },
+  { name: "news", label: "News & updates", href: "/news/" },
   { name: "contact", label: "Say hello", href: "/contact/" },
 ] as const;
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
+}
+
+export function SiteHeader({ theme, onThemeChange }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -40,6 +48,16 @@ export function SiteHeader() {
             {item.label}
           </a>
         ))}
+        <button
+          className="theme-toggle"
+          type="button"
+          aria-pressed={theme === "dark"}
+          aria-label={`Switch to ${theme === "dark" ? "day" : "night"} mode`}
+          onClick={() => onThemeChange(theme === "dark" ? "light" : "dark")}
+        >
+          <span aria-hidden="true">{theme === "dark" ? "☼" : "☾"}</span>
+          {theme === "dark" ? "Day mode" : "Night mode"}
+        </button>
         <a className="nav-cta" href={`mailto:${contactEmail}`}>
           Join the community <ArrowUpRight />
         </a>
