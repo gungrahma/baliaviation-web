@@ -28,22 +28,22 @@ export const galleryImages = [
 export const communityPillars = [
   {
     number: "01",
-    title: "Learn together",
+    title: "Menghubungkan",
     description:
-      "Swap knowledge, ask the curious questions, and find a friendly face at every stage of your aviation journey.",
+      "Menjadi wadah bagi pencinta aviasi di Bali untuk terhubung, berbagi karya, dan mengabadikan momen visual penerbangan..",
   },
   {
     number: "02",
-    title: "Meet in person",
+    title: "Mengembangkan",
     description:
-      "From laid-back spotting sessions to island-wide fly-ins, the best stories happen when we get together.",
+      "Menyediakan ruang bagi siapa saja yang ingin belajar dan mengembangkan diri di dunia aviasi."
   },
   {
     number: "03",
-    title: "Look up, always",
+    title: "Memberdayakan",
     description:
-      "Celebrate the aircraft, the people, and the little moments that make all of us fall in love with flight.",
-  },
+      "Menjadi sarana pengembangan bakat bagi anggota di bidang fotografi dan industri kreatif aviasi."
+  }
 ];
 
 export const contactEmail = "hello@baliaviation.community";
