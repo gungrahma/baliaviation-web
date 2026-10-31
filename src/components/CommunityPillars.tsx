@@ -4,8 +4,7 @@ export function CommunityPillars() {
   return (
     <section className="pillars">
       <div className="pillars-heading">
-        <p className="eyebrow"><span className="eyebrow-line" /> The way we fly</p>
-        <h2>Built on shared<br />passion.</h2>
+        <h2>Misi kami<br />di Bali Aviation</h2>
       </div>
       <div className="pillar-list">
         {communityPillars.map((pillar) => (
@@ -15,7 +14,6 @@ export function CommunityPillars() {
               <h3>{pillar.title}</h3>
               <p>{pillar.description}</p>
             </div>
-            <span className="pillar-plus" aria-hidden="true">↗</span>
           </article>
         ))}
       </div>
