@@ -6,10 +6,10 @@ import { ArrowUpRight } from "./ArrowUpRight";
 type Theme = "light" | "dark";
 
 const navigation = [
-  { name: "about", label: "Our community", href: "/about/" },
-  { name: "gallery", label: "In the skies", href: "/gallery/" },
-  { name: "news", label: "News & updates", href: "/news/" },
-  { name: "contact", label: "Say hello", href: "/contact/" },
+  { name: "about", label: "Tentang Komunitas", href: "/about/" },
+  { name: "gallery", label: "Galeri Kami", href: "/gallery/" },
+  { name: "news", label: "Berita dan Update", href: "/news/" },
+  { name: "contact", label: "Hubungi Kami", href: "/contact/" },
 ] as const;
 
 interface SiteHeaderProps {
@@ -59,7 +59,7 @@ export function SiteHeader({ theme, onThemeChange }: SiteHeaderProps) {
           {theme === "dark" ? "Day mode" : "Night mode"}
         </button>
         <a className="nav-cta" href={`mailto:${contactEmail}`}>
-          Join the community <ArrowUpRight />
+          Gabung dengan komunitas <ArrowUpRight />
         </a>
       </nav>
     </header>
