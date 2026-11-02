@@ -8,15 +8,14 @@ export function AboutPage() {
     <>
       <PageHero
         image="about"
-        eyebrow="A place for everyone who looks up"
-        title={<>Meet the<br /><span>community.</span></>}
-        copy="Aviation brings us together. The people, curiosity, and island spirit are what make this community feel like home."
+        eyebrow="Tentang kami"
+        title={<>Mengenal lebih jauh<br /><span>komunitas.</span></>}
+        copy="DImulai dari sebuah grup instagram hingga melebar menuju grup whatsapp."
       />
       <section className="about-story section-wrap">
-        <div className="section-index"><span>01</span> / OUR STORY</div>
+        <div className="section-index"><span>01</span> / TENTANG KAMI</div>
         <div className="about-story-copy">
-          <p className="eyebrow eyebrow--dark">Different paths, one shared sky</p>
-          <h2>Grounded in Bali.<br /><span>Connected by flight.</span></h2>
+          <h2>Dimulai dari<br /><span>Instagram.</span></h2>
           <p className="body-copy">
             Bali Aviation Community is a welcoming meeting point for the people who make aviation part of their lives. We bring together pilots, plane spotters, aviation professionals, students, and anyone who simply loves the view from above.
           </p>
@@ -29,9 +28,9 @@ export function AboutPage() {
       </section>
       <CommunityPillars />
       <section className="about-invite">
-        <p className="eyebrow eyebrow--dark">Your next chapter starts here</p>
-        <h2>Whatever your path,<br /><span>you belong.</span></h2>
-        <a className="button button--light" href="/contact/">Come say hello <ArrowUpRight /></a>
+        <p className="eyebrow eyebrow--dark">KONTAK KAMI!</p>
+        <h2>Ingin <br /><span>bergabung?</span></h2>
+        <a className="button button--light" href="/contact/">Bergabung <ArrowUpRight /></a>
       </section>
     </>
   );
